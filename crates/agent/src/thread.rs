@@ -1707,7 +1707,7 @@ impl Thread {
                                             completion.queue_state =  QueueState::Started;
                                         }
                                         CompletionRequestStatus::Failed {
-                                            code, message, request_id
+                                            code, message, request_id, ..
                                         } => {
                                             anyhow::bail!("completion request failed. request_id: {request_id}, code: {code}, message: {message}");
                                         }
