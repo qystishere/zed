@@ -3,8 +3,12 @@ name: Build Fork
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
 
 jobs:
   bundle_windows_x86_64:
@@ -12,23 +16,29 @@ jobs:
     env:
       CARGO_INCREMENTAL: 0
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: steps::checkout_repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           clean: false
 
-      - name: Setup Rust
-        uses: dtolnay/rust-action@stable
+      - name: steps::setup_node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "20"
 
-      - name: Build
-        run: cargo build --release -p zed
+      - name: run_bundling::bundle_windows::bundle_windows
+        run: script/bundle-windows.ps1 -Architecture x86_64
         shell: pwsh
 
-      - name: Upload artifact
+      - name: Upload Zed-x86_64.exe
         uses: actions/upload-artifact@v4
         with:
-          name: zed-windows-x86_64
-          path: target/release/zed.exe
+          name: Zed-x86_64.exe
+          path: target/Zed-x86_64.exe
           if-no-files-found: error
 
     timeout-minutes: 120
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
